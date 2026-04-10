@@ -1,0 +1,24 @@
+services:
+  web-pipeline:
+    image: node:20-alpine
+    container_name: knowledge_hub_pipeline_web
+    working_dir: /app
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+    environment:
+      - MONGODB_URI=mongodb://db-pipeline:27017/university-notes
+    command: >
+      sh -c "npm install && npm run build && npm start"
+    depends_on:
+      - db-pipeline
+
+  db-pipeline:
+    image: mongo:latest
+    container_name: knowledge_hub_pipeline_db
+    volumes:
+      - mongodb_pipeline_data:/data/db
+
+volumes:
+  mongodb_pipeline_data:

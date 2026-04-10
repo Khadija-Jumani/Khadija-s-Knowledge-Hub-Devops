@@ -1,17 +1,13 @@
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: khadijajumani/knowledge-hub:latest
     container_name: knowledge_hub_web
     ports:
       - "3000:3000"
     environment:
       - MONGODB_URI=mongodb://db:27017/university-notes
-      - NODE_ENV=production
     depends_on:
       - db
-    restart: always
 
   db:
     image: mongo:latest
@@ -20,7 +16,6 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    restart: always
 
 volumes:
   mongodb_data:
