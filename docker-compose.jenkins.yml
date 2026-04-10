@@ -1,13 +1,13 @@
-version: '3.8'
-
 services:
   web-pipeline:
-    container_name: knowledge_hub_pipeline_web
     image: node:20-alpine
+    container_name: knowledge_hub_pipeline_web
+    working_dir: /app
     ports:
       - "3005:3000"
     volumes:
       - .:/app
+      - /app/node_modules
     environment:
       - MONGODB_URI=mongodb://db-pipeline:27017/university-notes
       - NODE_OPTIONS=--max-old-space-size=1024
@@ -16,10 +16,8 @@ services:
       - db-pipeline
 
   db-pipeline:
-    container_name: knowledge_hub_pipeline_db
     image: mongo:latest
-    ports:
-      - "27018:27017"
+    container_name: knowledge_hub_pipeline_db
     volumes:
       - mongodb_pipeline_data:/data/db
 
