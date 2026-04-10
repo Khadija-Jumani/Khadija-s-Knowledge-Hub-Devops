@@ -3,8 +3,9 @@ services:
     image: node:20-alpine
     container_name: knowledge_hub_pipeline_web
     working_dir: /app
-    ports:
-      - "3001:3000"
+   ports:
+  - "3005:3000"
+
     volumes:
       - .:/app
     environment:
