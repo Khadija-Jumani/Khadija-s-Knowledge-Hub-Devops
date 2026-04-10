@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   web-pipeline:
-    container_name: knowledge_hub_pipeline_web
     image: node:20-alpine
+    container_name: knowledge_hub_pipeline_web
+    working_dir: /app
     ports:
       - "3001:3000"
     volumes:
@@ -16,10 +15,8 @@ services:
       - db-pipeline
 
   db-pipeline:
-    container_name: knowledge_hub_pipeline_db
     image: mongo:latest
-    ports:
-      - "27018:27017"
+    container_name: knowledge_hub_pipeline_db
     volumes:
       - mongodb_pipeline_data:/data/db
 
