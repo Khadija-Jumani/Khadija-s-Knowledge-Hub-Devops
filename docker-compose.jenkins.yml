@@ -9,6 +9,7 @@ services:
       - .:/app
     environment:
       - MONGODB_URI=mongodb://db-pipeline:27017/university-notes
+      - NODE_OPTIONS=--max-old-space-size=1024
     command: >
       sh -c "npm install && npm run build && npm start"
     depends_on:
