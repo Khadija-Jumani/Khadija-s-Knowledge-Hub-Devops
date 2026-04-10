@@ -1,34 +1,22 @@
-# Use Node 20 alpine for better performance and smaller size
+# Use Node 20 alpine
 FROM node:20-alpine AS builder
-
 WORKDIR /app
 
-# Copy package files
+# Give the build process 1024MB of RAM (Perfect for t3.micro)
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+
 COPY package.json package-lock.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy all source files
 COPY . .
-
-# Build the Next.js application
 RUN npm run build
 
-# Production image
+# Production stage
 FROM node:20-alpine AS runner
-
 WORKDIR /app
-
-ENV NODE_ENV=production
-
-# Copy necessary files from builder
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/next.config.ts ./next.config.ts
-
-# Start the application
 EXPOSE 3000
 CMD ["npm", "start"]
