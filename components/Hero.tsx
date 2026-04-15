@@ -37,7 +37,7 @@ export default function Hero() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="inline-block px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wider mb-4"
                 >
-                    ● AVAILABLE FOR OPPORTUNITIES
+                    ● CI/CD PIPELINE ACTIVE
                 </motion.div>
 
                 <motion.h1
