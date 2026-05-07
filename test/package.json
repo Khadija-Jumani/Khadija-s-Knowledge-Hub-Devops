@@ -1,0 +1,12 @@
+{
+  "name": "selenium-tests",
+  "version": "1.0.0",
+  "description": "Selenium automated tests for DevOps Assignment 3",
+  "main": "selenium_tests.js",
+  "scripts": {
+    "test": "node selenium_tests.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.19.0"
+  }
+}
