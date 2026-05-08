@@ -20,7 +20,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building the application Docker image..."
-                // Hum AWS ki space limits se bachne ke liye choti image use kar rahe hain
                 sh "echo 'FROM alpine:latest' > Dockerfile.test"
                 sh "echo 'CMD sleep 3600' >> Dockerfile.test"
                 sh "cat Dockerfile.test | docker build -t ${APP_IMAGE} -"
@@ -37,7 +36,8 @@ pipeline {
             steps {
                 echo "Running Selenium Test Cases..."
                 dir('assignment-3/tests') {
-                    sh 'npm install'
+                    // Hum --legacy-peer-deps laga rahe hain taake package version ka koi error na aaye
+                    sh 'npm install --legacy-peer-deps'
                     sh 'apk add --no-cache chromium chromium-chromedriver || true'
                     sh 'export BASE_URL=https://khadija-s-knowledge-hub-bwi3.vercel.app && npm test'
                 }
