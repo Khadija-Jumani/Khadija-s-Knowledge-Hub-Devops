@@ -10,13 +10,18 @@ pipeline {
     }
 
     stages {
-        // Sir ki requirement ko poora karne ke liye: "Must be down initially"
+        // Sir ki requirement ko poora karne ke liye aur SPACE masla theek karne ke liye
         stage('Ensure Deployment is Down Initially') {
             steps {
                 echo "Stopping any existing running containers..."
                 sh "docker stop university-notes-container || true"
                 sh "docker rm university-notes-container || true"
-                echo "Website is now DOWN. Proceeding to tests..."
+                
+                // YEH LINE AUTOMATICALLY SPACE FREE KAREGI
+                echo "Cleaning up space..."
+                sh "docker system prune -a --volumes -f"
+                
+                echo "Website is now DOWN and Space is Cleaned. Proceeding to tests..."
             }
         }
 
