@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     triggers {
-        // Trigger the pipeline automatically when a GitHub push occurs (Instructor Push)
         githubPush()
     }
 
@@ -21,18 +20,19 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building the application Docker image..."
-                sh "docker build -t ${APP_IMAGE} ."
+                sh "docker build -m 700m -t ${APP_IMAGE} ."
             }
         }
 
         stage('Test (Containerized via Docker)') {
             agent {
-                docker { image 'node:18-alpine' }
+                docker {
+                    image 'node:18-alpine'
+                }
             }
             steps {
                 echo "Running Selenium Test Cases..."
-                // Aapne folder ka naam "test" rakha hai, isliye yahan "test" likha hai
-                dir('test') {
+                dir('assignment-3/tests') {
                     sh 'npm install'
                     sh 'apk add --no-cache chromium chromium-chromedriver || true'
                     sh 'export BASE_URL=https://khadija-s-knowledge-hub-bwi3.vercel.app && npm test'
@@ -43,21 +43,23 @@ pipeline {
         stage('Deploy (Bring Deployment Up)') {
             steps {
                 echo "Bringing the containerized deployment up..."
-                // Stop previous instances
                 sh "docker stop university-notes-container || true"
                 sh "docker rm university-notes-container || true"
-                // Run the new container, bringing the deployment UP
                 sh "docker run -d -p 80:3000 --name university-notes-container ${APP_IMAGE}"
+                echo "Deployment is now UP on port 80!"
             }
         }
     }
 
     post {
+        always {
+            echo "Pipeline finished."
+        }
         success {
             script {
                 emailext (
                     subject: "SUCCESS: Test Results - DevOps Assignment 3",
-                    body: "All 15 Selenium tests passed! The container deployment was brought UP. Check results at ${env.BUILD_URL}",
+                    body: "The tests passed and the deployment is now UP. Check results at ${env.BUILD_URL}",
                     to: "qasimalik@gmail.com, ${env.BUILD_USER_EMAIL}"
                 )
             }
