@@ -35,11 +35,12 @@ pipeline {
             }
             steps {
                 echo "Running Selenium Test Cases..."
-                dir('assignment-3/tests') {
-                    // Hum --legacy-peer-deps laga rahe hain taake package version ka koi error na aaye
-                    sh 'npm install --legacy-peer-deps'
+                // Aapke GitHub ke hisaab se folder ka naam 'test' hai
+                dir('test') {
+                    // Conflicts se bachne ke liye hum direct packages install kar rahe hain
+                    sh 'npm install selenium-webdriver mocha --no-save'
                     sh 'apk add --no-cache chromium chromium-chromedriver || true'
-                    sh 'export BASE_URL=https://khadija-s-knowledge-hub-bwi3.vercel.app && npm test'
+                    sh 'export BASE_URL=https://khadija-s-knowledge-hub-bwi3.vercel.app && node selenium_tests.js'
                 }
             }
         }
