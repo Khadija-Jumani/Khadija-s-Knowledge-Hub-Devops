@@ -10,6 +10,16 @@ pipeline {
     }
 
     stages {
+        // Sir ki requirement ko poora karne ke liye: "Must be down initially"
+        stage('Ensure Deployment is Down Initially') {
+            steps {
+                echo "Stopping any existing running containers..."
+                sh "docker stop university-notes-container || true"
+                sh "docker rm university-notes-container || true"
+                echo "Website is now DOWN. Proceeding to tests..."
+            }
+        }
+
         stage('Checkout') {
             steps {
                 echo "Fetching code from GitHub..."
@@ -20,9 +30,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building the application Docker image..."
-                sh "echo 'FROM alpine:latest' > Dockerfile.test"
-                sh "echo 'CMD sleep 3600' >> Dockerfile.test"
-                sh "cat Dockerfile.test | docker build -t ${APP_IMAGE} -"
+                // Yahan hum aapki asli Next.js website ka Dockerfile use kar rahe hain
+                sh "docker build -t ${APP_IMAGE} ."
             }
         }
 
@@ -48,10 +57,9 @@ pipeline {
         stage('Deploy (Bring Deployment Up)') {
             steps {
                 echo "Bringing the containerized deployment up..."
-                sh "docker stop university-notes-container || true"
-                sh "docker rm university-notes-container || true"
-                sh "docker run -d --name university-notes-container ${APP_IMAGE}"
-                echo "Deployment is now UP!"
+                // Yahan port 80 ko 3000 ke sath map kar diya gaya hai
+                sh "docker run -d -p 80:3000 --name university-notes-container ${APP_IMAGE}"
+                echo "Deployment is now UP on port 80!"
             }
         }
     }
