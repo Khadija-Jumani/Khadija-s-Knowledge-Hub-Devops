@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khadija's Knowledge Hub | DevOps Cloud Native Portal</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="glass-bg"></div>
+  
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <i class="fa-solid fa-cloud-bolt logo-icon"></i>
+        <div>
+          <h1>Khadija's Knowledge Hub</h1>
+          <p class="tagline">Cloud Native Portal &bull; DevOps for Cloud Computing</p>
+        </div>
+      </div>
+      <div class="academic-info">
+        <div class="badge">Assignment - 4</div>
+        <div class="badge university">COMSATS UNIVERSITY ISLAMABAD</div>
+        <div class="instructor">Instructor: <span>Qasim Malik</span></div>
+      </div>
+    </header>
+
+    <!-- Main Grid Dashboard -->
+    <main class="dashboard-grid">
+      <!-- Left Column: Stats & Add Form -->
+      <section class="left-panel">
+        
+        <!-- Status Card -->
+        <div class="glass-card status-card">
+          <h3><i class="fa-solid fa-server"></i> Cluster & Database Status</h3>
+          <div class="status-metrics">
+            <div class="metric">
+              <span class="label">Database Connection</span>
+              <span id="db-status" class="value status-pill connecting">Checking...</span>
+            </div>
+            <div class="metric">
+              <span class="label">Active Pod Hostname</span>
+              <span id="pod-name" class="value text-highlight">Unknown</span>
+            </div>
+            <div class="metric">
+              <span class="label">Total Saved Notes</span>
+              <span id="total-notes-count" class="value font-bold">0</span>
+            </div>
+            <div class="metric">
+              <span class="label">Uptime</span>
+              <span id="server-uptime" class="value">0s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Resource Card -->
+        <div class="glass-card form-card">
+          <h3><i class="fa-solid fa-circle-plus"></i> Share a DevOps Note</h3>
+          <form id="note-form">
+            <div class="form-group">
+              <label for="note-title">Topic / Title</label>
+              <input type="text" id="note-title" placeholder="e.g., Understanding Kubernetes Services" required>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="note-category">Category</label>
+                <select id="note-category">
+                  <option value="Kubernetes">Kubernetes</option>
+                  <option value="Docker">Docker</option>
+                  <option value="CI/CD (Jenkins)">CI/CD (Jenkins)</option>
+                  <option value="Terraform">Terraform</option>
+                  <option value="AWS/Cloud">AWS/Cloud</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="note-author">Contributor Name</label>
+                <input type="text" id="note-author" placeholder="e.g., Khadija" value="Khadija Jumani">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="note-content">Note Content / Resources Description</label>
+              <textarea id="note-content" rows="4" placeholder="Write summary, kubectl commands, or notes here..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              <i class="fa-solid fa-paper-plane"></i> Save to MongoDB
+            </button>
+          </form>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Notes Stream -->
+      <section class="right-panel">
+        <div class="section-title">
+          <h2><i class="fa-solid fa-book-bookmark"></i> Knowledge Hub Repository</h2>
+          <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="search-input" placeholder="Search saved resources...">
+          </div>
+        </div>
+
+        <div id="notes-container" class="notes-grid">
+          <!-- Notes will be loaded here dynamically -->
+          <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Loading database resources...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2026 COMSATS University Islamabad &bull; Department of Computer Science &bull; BCS-7 / BDS-7 / BAI-6</p>
+      <div class="k8s-badge">
+        <i class="fa-brands fa-rust"></i> Powered by Kubernetes Orchestration &amp; Minikube
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

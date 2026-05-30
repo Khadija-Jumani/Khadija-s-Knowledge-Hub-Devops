@@ -1,37 +1,184 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DevOps Assignment 4: Kubernetes Web & Database Deployment
 
-## Getting Started
+This repository contains a simplified, premium, lightweight version of **Khadija's Knowledge Hub** optimized for deployment on a Kubernetes cluster using Minikube on an AWS EC2 instance.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🏗️ System Architecture
+
+The application is built on a 2-tier cloud-native architecture:
+1. **Web Server Tier**: A Node.js Express application that serves a responsive, animated dashboard for managing DevOps resources.
+2. **Database Tier**: A MongoDB Server for persistent data storage.
+
+```
+                  +----------------------------------------------+
+                  |               Kubernetes Cluster             |
+                  |                                              |
+                  |   +------------------+                       |
+                  |   |     Web Pod      |                       |
+                  |   | (Node.js/Express) |                       |
+                  |   +--------+---------+                       |
+                  |            |                                 |
+                  |            | Connects via internal Service   |
+                  |            v                                 |
+                  |   +------------------+  Mounts PVC   +---+   |
+                  |   |   Database Pod   |-------------->|PV |   |
+                  |   |    (MongoDB)     |               +---+   |
+                  |   +------------------+                       |
+                  |                                              |
+                  +----------------------------------------------+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📋 Prerequisites & EC2 Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. AWS EC2 Instance Security Group Configuration
+To access the services and dashboard externally, ensure the following inbound rules are added to your AWS EC2 Security Group:
+- **Port 22**: SSH (For access and tunneling)
+- **Port 80 / 443**: HTTP/HTTPS
+- **Port 3000**: Web Application Port
+- **Port 8001 / 8080**: Kubernetes Dashboard / Port-forwarding
 
-## Learn More
+### 2. Minikube and Tooling Installation (Ubuntu EC2)
+Run the following script on your EC2 instance to install Docker, Kubectl, and Minikube:
+```bash
+# Update Packages
+sudo apt-get update && sudo apt-get upgrade -y
 
-To learn more about Next.js, take a look at the following resources:
+# Install Docker
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo usermod -aG docker $USER && newgrp docker
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Install Kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Install Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+```
 
-## Deploy on Vercel
+Start Minikube:
+```bash
+minikube start --driver=docker
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-giving the trigger
+## 🚀 Quick Deployment Guide
+
+You can deploy the entire stack automatically using the included script:
+
+```bash
+# Make script executable
+chmod +x deploy.sh
+
+# Run the deployment script
+./deploy.sh
+```
+
+---
+
+## 🛠️ Manual Deployment Guide
+
+If you prefer applying the manifests manually, follow these commands:
+
+### 1. Build the Docker Image inside Minikube Context
+Point your shell to Minikube's Docker daemon so the image is built directly inside the cluster registry:
+```bash
+eval $(minikube docker-env)
+docker build -t khadijajumani/knowledge-hub:latest .
+```
+
+### 2. Apply Kubernetes Manifests
+```bash
+# 1. Apply Persistent Storage
+kubectl apply -f k8s/db-pvc.yaml
+
+# 2. Deploy Database Server & Service
+kubectl apply -f k8s/db-deployment.yaml
+kubectl apply -f k8s/db-service.yaml
+
+# 3. Deploy Web Server & Service
+kubectl apply -f k8s/web-deployment.yaml
+kubectl apply -f k8s/web-service.yaml
+
+# 4. Deploy HorizontalPodAutoscaler
+kubectl apply -f k8s/hpa.yaml
+```
+
+### 3. Enable Metrics Server (Required for HPA Autoscaling)
+```bash
+minikube addons enable metrics-server
+```
+
+---
+
+## 🌐 Tunneling & External Access (Secure Tunnels)
+
+Since Minikube runs inside a container on the EC2 instance, the URL generated by `minikube service --url` is private (`127.0.0.1` or cluster-internal IP). To expose the services to the public internet for grading, choose one of these methods:
+
+### Method A: SSH Port Forwarding (Recommended & Securest)
+Run these commands **on your local machine** (your laptop/PC) to forward ports securely from EC2:
+1. **Expose the Web Application** (forwarding to local port 3000):
+   ```bash
+   ssh -i /path/to/key.pem -N -L 3000:localhost:30080 ubuntu@YOUR-EC2-PUBLIC-IP
+   ```
+   *Access in browser at: `http://localhost:3000`*
+
+2. **Expose the Kubernetes Dashboard** (forwarding to local port 8001):
+   Run the dashboard on EC2:
+   ```bash
+   minikube dashboard --url
+   # (Notes down the port number, e.g. 127.0.0.1:45321)
+   ```
+   Now port forward from your local computer:
+   ```bash
+   ssh -i /path/to/key.pem -N -L 8001:localhost:DASHBOARD_PORT ubuntu@YOUR-EC2-PUBLIC-IP
+   ```
+   *Access in browser at: `http://localhost:8001`*
+
+### Method B: Public Port Forwarding via Kubectl
+If you want to access the app directly via the EC2 Public IP address (without SSH tunnels):
+1. **Web App**:
+   ```bash
+   kubectl port-forward --address 0.0.0.0 service/web-service 3000:3000
+   ```
+   *Access in browser at: `http://YOUR-EC2-PUBLIC-IP:3000`* (Ensure Port 3000 is open in Security Groups)
+
+2. **Dashboard**:
+   ```bash
+   kubectl port-forward --address 0.0.0.0 kubernetes-dashboard-xxxx 8001:8001 -n kubernetes-dashboard
+   ```
+   *Access in browser at: `http://YOUR-EC2-PUBLIC-IP:8001`*
+
+### Method C: Ngrok Tunneling (Provides public HTTPS links)
+1. Install Ngrok on EC2.
+2. Open tunnels:
+   ```bash
+   # Terminal 1 - Web Service
+   ngrok http http://localhost:30080
+   
+   # Terminal 2 - Dashboard
+   ngrok http http://localhost:DASHBOARD_PORT
+   ```
+   *Copy the generated `https://*.ngrok-free.app` URLs for submission.*
+
+---
+
+## 📈 Verifying Autoscaling (HPA)
+
+To see the Horizontal Pod Autoscaler scale your pods dynamically:
+1. Open a terminal and run the resource monitor:
+   ```bash
+   kubectl get hpa -w
+   ```
+2. Generate synthetic load by launching a temporary container and hitting the web server in a loop:
+   ```bash
+   kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never -- /bin/sh -c "while true; do wget -q -O- http://web-service:3000/api/health; done"
+   ```
+3. Watch the CPU utilization increase and see `web-deployment` replicas scale from 1 to 5.

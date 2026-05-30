@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  labels:
+    app: web
+spec:
+  replicas: 1 # Start with 1 replica, HPA will scale dynamically
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web-server
+          image: khadijajumani/knowledge-hub:latest
+          imagePullPolicy: IfNotPresent # Allows running from local minikube registry
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            # Connect to database using K8s service name
+            - name: MONGO_URI
+              value: "mongodb://db-service:27017/knowledgehub"
+          # Resource constraints (CRITICAL for HPA metric calculations)
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          # Health probes to monitor application availability
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10

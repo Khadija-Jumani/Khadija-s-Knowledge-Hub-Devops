@@ -1,22 +1,24 @@
-# Use Node 20 alpine
-FROM node:20-alpine AS builder
-WORKDIR /app
+# Use lightweight official Node alpine image
+FROM node:20-alpine
 
-# Give the build process 1024MB of RAM (Perfect for t3.micro)
-ENV NODE_OPTIONS="--max-old-space-size=1024"
+# Set working directory
+WORKDIR /usr/src/app
 
-COPY package.json package-lock.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+# Copy dependency manifests
+COPY package*.json ./
 
-# Production stage
-FROM node:20-alpine AS runner
-WORKDIR /app
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/next.config.ts ./next.config.ts
+# Install only production dependencies
+RUN npm install --only=production
+
+# Copy application source code and public assets
+COPY server.js ./
+COPY public/ ./public/
+
+# Expose the application port
 EXPOSE 3000
-CMD ["npm", "start"]
+
+# Set environment to production
+ENV NODE_ENV=production
+
+# Start the Node.js web server
+CMD ["node", "server.js"]
